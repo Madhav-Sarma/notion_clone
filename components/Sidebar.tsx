@@ -33,7 +33,7 @@ function Sidebar() {
         owner: [],
         collaborator: [],
     })
-    const [data, loading, error] = useCollection(
+    const [data, , ] = useCollection(
         user && (
             query(collectionGroup(db, 'rooms'),
                 where('userId', '==', user.emailAddresses[0].toString()))
