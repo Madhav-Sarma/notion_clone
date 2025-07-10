@@ -4,19 +4,15 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { FormEvent, useState, useTransition } from "react"
+import { useState, useTransition } from "react"
 import { Button } from "./ui/button"
-import { DialogClose } from "@radix-ui/react-dialog"
-import { usePathname, useRouter } from "next/navigation"
+
 import { removeUserFromDoc } from "@/actions/actions"
-import { toast } from "sonner"
-import { Input } from "./ui/input"
-import { User2Icon } from "lucide-react"
+
 import { useUser } from "@clerk/nextjs"
 import { useRoom } from "@liveblocks/react"
 import useOwner from "@/lib/useOwner"
@@ -38,7 +34,7 @@ function ManageUsers() {
     const handleDelete = (userId: string) => {
         startTransition(async () => {
             if(!user) return;
-            const {success} = await removeUserFromDoc({roomId:room.id,email:userId})
+            await removeUserFromDoc({roomId:room.id,email:userId})
         })
     }
     return (
