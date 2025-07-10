@@ -42,3 +42,4 @@ next-env.d.ts
 
 #google firebase
 service_key.json
+firebase.ts
