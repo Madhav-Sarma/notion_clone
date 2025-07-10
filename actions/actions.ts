@@ -50,3 +50,67 @@ export async function deleteDocu(roomId: string) {
         return { success: false }
     }
 }
+
+export async function inviteUserToDocu(roomId: string, email: string) {
+  auth.protect();
+
+  try {
+    // 1. Check if the user is the owner of the room
+    const roomSnap = await adminDb.collection("documents").doc(roomId).get();
+
+    if (!roomSnap.exists) {
+      return { success: false, error: "Room does not exist" };
+    }
+
+    const roomData = roomSnap.data();
+    if (roomData?.owner === email) {
+      return { success: false, isOwner: true };
+    }
+
+    // 2. Check if already a collaborator
+    const collaboratorDoc = await adminDb
+      .collection("users")
+      .doc(email)
+      .collection("rooms")
+      .doc(roomId)
+      .get();
+
+    if (collaboratorDoc.exists) {
+      return { success: false, isCollaborator: true };
+    }
+
+    // 3. Add as a new collaborator
+    await adminDb
+      .collection("users")
+      .doc(email)
+      .collection("rooms")
+      .doc(roomId)
+      .set({
+        userId: email,
+        role: "Collaborator",
+        createdAt: new Date(),
+        roomId,
+      });
+
+    return { success: true };
+  } catch (e) {
+    console.error(e);
+    return { success: false };
+  }
+}
+
+export async function removeUserFromDoc({ roomId, email }: { roomId: string, email: string }) {
+    auth.protect();
+    try{
+      await adminDb
+      .collection("users")
+      .doc(email)
+      .collection("rooms")
+      .doc(roomId)
+      .delete();
+    return { success: true }
+    } catch (e) {
+        console.error(e);
+        return { success: false };
+    }
+}
