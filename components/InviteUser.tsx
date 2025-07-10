@@ -11,7 +11,7 @@ import {
 import { FormEvent, useState, useTransition } from "react"
 import { Button } from "./ui/button"
 
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import {  inviteUserToDocu } from "@/actions/actions"
 import { toast } from "sonner"
 import { Input } from "./ui/input"
