@@ -1,5 +1,7 @@
+'use client';
+
 import { useRoom, useSelf } from "@liveblocks/react/suspense";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import * as Y from "yjs";
 import { LiveblocksYjsProvider } from "@liveblocks/yjs";
 import { Button } from "./ui/button";
@@ -10,22 +12,31 @@ import { useCreateBlockNote } from "@blocknote/react";
 import "@blocknote/core/style.css";
 import "@blocknote/shadcn/style.css";
 import { stringToColor } from "@/lib/stringToColor";
+import TranslateDoc from "./TranslateDoc";
+import type { OpaqueRoom } from "@liveblocks/core";
 
-type EditorProps = {
-  doc: Y.Doc;
-  provider: LiveblocksYjsProvider;
-  darkMode: boolean;
-  userInfo: {
-    name: string;
-    email: string;
-  };
-};
+// collaboration setup
+function useLiveblocksCollaboration(room: OpaqueRoom) {
+  const { doc, provider } = useMemo(() => {
+    const doc = new Y.Doc();
+    const provider = new LiveblocksYjsProvider(room, doc);
+    return { doc, provider };
+  }, [room]);
+
+  useEffect(() => {
+    return () => {
+      provider.disconnect();
+    };
+  }, [provider]);
+
+  return { doc, provider };
+}
 
 function BlockNote({ doc, provider, darkMode, userInfo }: EditorProps) {
   const editor: BlockNoteEditor = useCreateBlockNote({
     collaboration: {
       provider,
-      fragment: doc.getXmlFragment("documnet-store"),
+      fragment: doc.getXmlFragment("document-store"),
       user: {
         name: userInfo.name,
         color: stringToColor(userInfo.email),
@@ -44,23 +55,12 @@ function BlockNote({ doc, provider, darkMode, userInfo }: EditorProps) {
   );
 }
 
+// main editor
 function Editor({ title }: { title: string }) {
-  const room = useRoom();
+  const room = useRoom() as OpaqueRoom;
   const userInfo = useSelf((me) => me.info);
-  const [doc, setDoc] = useState<Y.Doc>();
-  const [provider, setProvider] = useState<LiveblocksYjsProvider>();
+  const { doc, provider } = useLiveblocksCollaboration(room);
   const [darkMode, setDarkMode] = useState(false);
-
-  useEffect(() => {
-    const yDoc = new Y.Doc();
-    const yPRovider = new LiveblocksYjsProvider(room, yDoc);
-    setDoc(yDoc);
-    setProvider(yPRovider);
-    return () => {
-      yDoc?.destroy();
-      yPRovider?.destroy();
-    };
-  }, [room]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
@@ -76,6 +76,8 @@ function Editor({ title }: { title: string }) {
     <div className="max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-10">
         {/* Translate the doc AI*/}
+        {doc && <TranslateDoc doc={doc} />}
+
         {/* CHAT TO Doc with AI */}
 
         {/* heading */}
@@ -101,3 +103,13 @@ function Editor({ title }: { title: string }) {
 }
 
 export default Editor;
+
+type EditorProps = {
+  doc: Y.Doc;
+  provider: LiveblocksYjsProvider;
+  darkMode: boolean;
+  userInfo: {
+    name: string;
+    email: string;
+  };
+};
