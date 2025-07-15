@@ -53,7 +53,7 @@ function TranslateDoc({ doc }: { doc: Y.Doc }) {
     const [isOpen, setIsOpen] = useState(false);
     const [language, setLanguage] = useState("");
     const [summary, setSummary] = useState("");
-    const [question, setQuestion] = useState<string>("");
+    //const [question, setQuestion] = useState<string>("");
     const [isPending, startTransition] = useTransition();
 
     const handleQuestion = async (e: FormEvent) => {
@@ -97,7 +97,7 @@ function TranslateDoc({ doc }: { doc: Y.Doc }) {
                         Select a language to translate the document summary into.
                     </DialogDescription>
                     <hr className="mt-5" />
-                    {question && <p className='mt-5 text-gray-500'>Q : {question}</p>}
+                    {/*{question && <p className='mt-5 text-gray-500'>Q : {question}</p>}*/}
                 </DialogHeader>
 
                 {summary && <p className='mt-5 text-gray-500'>A : {summary}</p>}
